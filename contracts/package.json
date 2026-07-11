@@ -1,0 +1,12 @@
+{
+  "name": "blocks-contracts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "node deploy.mjs"
+  },
+  "dependencies": {
+    "solc": "0.8.28",
+    "viem": "^2.21.0"
+  }
+}

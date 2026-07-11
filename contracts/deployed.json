@@ -1,0 +1,416 @@
+{
+  "network": "base",
+  "chainId": 8453,
+  "deployer": "0x87B552Fe792Ca107e69AC630F43950f69DCf1381",
+  "deployedAt": "2026-05-22T12:31:11.752Z",
+  "deployBlockStart": "46331862",
+  "deployBlockEnd": "46331865",
+  "contracts": [
+    {
+      "file": "src/BlocksRun.sol",
+      "name": "BlocksRun",
+      "address": "0xca00c5470caf234a0ad9bc495e71d680125386ed",
+      "txHash": "0x4c02084735f40be0b14fafab663fdf056b8a3dc2c94b7c40cce7aa163a8a30e7",
+      "block": "46331864",
+      "gasUsed": "165967",
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "player",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "score",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "timeMs",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "levelsCleared",
+              "type": "uint8"
+            }
+          ],
+          "name": "RunRecorded",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "player",
+              "type": "address"
+            }
+          ],
+          "name": "bestScore",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "player",
+              "type": "address"
+            }
+          ],
+          "name": "bestTime",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "score",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timeMs",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "levelsCleared",
+              "type": "uint8"
+            }
+          ],
+          "name": "recordRun",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "file": "src/BlocksSkin.sol",
+      "name": "BlocksSkin",
+      "address": "0x2bb2ac4a4f568bb66150ee292792d14e52f8843b",
+      "txHash": "0x0a9bed51005caeb2dbb195b70eda9d20b4b198b0ab3df22e01725cb570c605d8",
+      "block": "46331865",
+      "gasUsed": "329705",
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "inputs": [],
+          "name": "AlreadyOwned",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSkin",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "NotOwner",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "WrongPrice",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "player",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "skinId",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "paid",
+              "type": "uint256"
+            }
+          ],
+          "name": "SkinMinted",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "PRICE",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "SKIN_COUNT",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "player",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "skinId",
+              "type": "uint8"
+            }
+          ],
+          "name": "isOwned",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint8",
+              "name": "skinId",
+              "type": "uint8"
+            }
+          ],
+          "name": "mintSkin",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "player",
+              "type": "address"
+            }
+          ],
+          "name": "ownedMask",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "mask",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "next",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address payable",
+              "name": "to",
+              "type": "address"
+            }
+          ],
+          "name": "withdraw",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "file": "src/BlocksDaily.sol",
+      "name": "BlocksDaily",
+      "address": "0x77cd92cc91cb95abe40329ff1f285284644cd060",
+      "txHash": "0x166d9107001b0ee759f672d54aba127667be72b03be73520dbf7593f511098c7",
+      "block": "46331866",
+      "gasUsed": "201227",
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint32",
+              "name": "dayKey",
+              "type": "uint32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "player",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "score",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "timeMs",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "cleared",
+              "type": "bool"
+            }
+          ],
+          "name": "DailyRunRecorded",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint32",
+              "name": "dayKey",
+              "type": "uint32"
+            },
+            {
+              "internalType": "address",
+              "name": "player",
+              "type": "address"
+            }
+          ],
+          "name": "bestScore",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint32",
+              "name": "dayKey",
+              "type": "uint32"
+            },
+            {
+              "internalType": "address",
+              "name": "player",
+              "type": "address"
+            }
+          ],
+          "name": "bestTime",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint32",
+              "name": "dayKey",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "score",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timeMs",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "cleared",
+              "type": "bool"
+            }
+          ],
+          "name": "recordDailyRun",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    }
+  ]
+}
