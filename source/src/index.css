@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0a1428;
+  --bg-deep: #050a16;
+  --base-blue: #0052FF;
+  --base-cyan: #00D4FF;
+  --base-ivory: #EEF4FF;
+  --base-mute: #4F5A75;
+  --shard: #00D4FF;
+  --warn: #FF4D6D;
+  --gold: #FFD23F;
+}
+
+html, body, #root {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;            /* dynamic viewport — accounts for mobile URL bar */
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  background: var(--bg);
+  color: var(--base-ivory);
+  font-family: 'VT323', monospace;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+}
+
+body {
+  /* Prevent iOS rubber-banding + horizontal/vertical edge swipes */
+  position: fixed;
+  overscroll-behavior: contain;
+}
+
+canvas {
+  display: block;
+  touch-action: none;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  /* Disable text selection blue tint on long-press */
+  -webkit-user-drag: none;
+}
+
+button {
+  /* Prevent double-tap zoom + iOS magnifier/callout on long-press */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS 16+ magnifier prevention — applies everywhere inside the app shell */
+#root, #root * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+/* Spinning ring under the analog joystick — pure CSS rotation */
+@keyframes joy-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.font-pix {
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: 0.02em;
+}
+
+.font-vt {
+  font-family: 'VT323', monospace;
+  letter-spacing: 0.02em;
+}
+
+.pixel-border {
+  box-shadow:
+    0 -3px 0 0 var(--base-ivory),
+    0 3px 0 0 var(--base-ivory),
+    -3px 0 0 0 var(--base-ivory),
+    3px 0 0 0 var(--base-ivory);
+}
+
+.pixel-btn {
+  position: relative;
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: 0.04em;
+  background: var(--base-blue);
+  color: var(--base-ivory);
+  padding: 14px 22px;
+  border: 0;
+  cursor: pointer;
+  box-shadow:
+    inset 0 -4px 0 0 rgba(0,0,0,0.35),
+    0 0 0 3px var(--base-ivory),
+    0 6px 0 0 #0040c0;
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+.pixel-btn:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 -2px 0 0 rgba(0,0,0,0.35),
+    0 0 0 3px var(--base-ivory),
+    0 3px 0 0 #0040c0;
+}
+
+.pixel-btn-secondary {
+  background: transparent;
+  color: var(--base-ivory);
+  box-shadow:
+    0 0 0 3px var(--base-ivory),
+    inset 0 0 0 3px var(--bg);
+}
+.pixel-btn-secondary:active {
+  transform: translateY(2px);
+}
+
+.scanline {
+  position: relative;
+}
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    rgba(0, 0, 0, 0.18) 2px 3px
+  );
+  pointer-events: none;
+}
+
+@keyframes blink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0; }
+}
+.blink {
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.float-y { animation: float-y 1.8s ease-in-out infinite; }
+
+@keyframes drift-x {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.safe-pad-top { padding-top: env(safe-area-inset-top); }
+.safe-pad-bot { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Orientation shell — fills viewport using dynamic viewport units so the
+   mobile browser URL bar doesn't clip the game. */
+#orient-shell {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Rotate-phone overlay shown only on portrait phones */
+.rotate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--bg-deep);
+  color: var(--base-ivory);
+  text-align: center;
+  padding: 24px;
+}
+html.needs-rotate .rotate-overlay { display: flex; }
+html.needs-rotate #orient-shell { visibility: hidden; }
+
+.rotate-icon {
+  width: 80px;
+  height: 80px;
+  animation: rotate-spin 1.8s ease-in-out infinite;
+}
+@keyframes rotate-spin {
+  0%, 100% { transform: rotate(-90deg); }
+  50% { transform: rotate(0deg); }
+}
