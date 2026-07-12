@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConnectKitProvider } from 'connectkit';
 import { wagmiConfig } from './config/wagmi';
 import App from './App';
+import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
 
 const queryClient = new QueryClient();
@@ -18,7 +19,9 @@ createRoot(document.getElementById('root')!).render(
           options={{ hideBalance: true, initialChainId: 8453 }}
         >
           <div id="orient-shell">
-            <App />
+            <ErrorBoundary>
+              <App />
+            </ErrorBoundary>
           </div>
         </ConnectKitProvider>
       </QueryClientProvider>
