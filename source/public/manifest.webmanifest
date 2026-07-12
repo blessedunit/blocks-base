@@ -1,7 +1,10 @@
 {
+  "id": "/",
   "name": "BLOCKS",
   "short_name": "BLOCKS",
   "description": "A pixel run on Base — hop, stomp, collect.",
+  "lang": "en",
+  "categories": ["games", "entertainment"],
   "start_url": "/",
   "display": "fullscreen",
   "orientation": "any",
