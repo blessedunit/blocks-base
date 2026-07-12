@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Keyboard pause: Escape / P (music stops while paused)
+- Joystick exposed to assistive tech (`role="application"` + label)
+- Line-ending normalization via `.gitattributes`
+
 ## 0.1.0 — 2026-07-12
 
 - Auto-pause when the tab/app goes to background; music is silenced while paused
