@@ -303,6 +303,14 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
       }
       if (keysDown.has(e.code)) return;
       keysDown.add(e.code);
+      if (e.code === 'Escape' || e.code === 'KeyP') {
+        const next = !pausedRef.current;
+        pausedRef.current = next;
+        setPaused(next);
+        if (next) stopMusic();
+        else startMusic(lastThemeRef.current);
+        return;
+      }
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
         inputRef.current.jumpPressed = true;
         inputRef.current.jumpHeld = true;
@@ -520,6 +528,8 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
   const joystick = (
     <div
       ref={joyBaseRef}
+      role="application"
+      aria-label="Movement joystick"
       onPointerDown={onJoyDown}
       onPointerMove={onJoyMove}
       onPointerUp={onJoyUp}

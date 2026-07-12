@@ -28,7 +28,7 @@ Crunchy 8-bit side-scrolling platformer on **Base**. Run, jump, stomp, fire — 
 | Jump (hold = higher) | HOP | Space / ↑ / W |
 | Crouch | ▼ | ↓ / S |
 | Sprint / Fireball | RUN/FIRE | Shift / X / Z |
-| Pause | ⏸ button | — |
+| Pause | ⏸ button | Esc / P |
 
 ## Onchain (Base mainnet, 8453)
 
