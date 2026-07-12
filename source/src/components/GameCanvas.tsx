@@ -670,6 +670,8 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
     >
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label="BLOCKS gameplay"
         style={{
           userSelect: 'none',
           WebkitUserSelect: 'none',
