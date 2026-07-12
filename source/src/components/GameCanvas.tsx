@@ -12,6 +12,7 @@ import {
 } from '../game/engine';
 import { render, getViewW } from '../game/renderer';
 import { isMuted, sfx, setMuted, startMusic, stopMusic, unlock } from '../game/audio';
+import type { MusicTheme } from '../game/audio';
 import { LEVELS } from '../game/world';
 
 // Small inline pixel-art icon helper — draws into a 14×14 canvas at 2× scale.
@@ -171,7 +172,7 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
   const [paused, setPaused] = useState(false);
   const [muted, setMutedState] = useState<boolean>(() => isMuted());
   const pausedRef = useRef(false);
-  const lastThemeRef = useRef<string>('');
+  const lastThemeRef = useRef<MusicTheme>('overworld');
 
   useEffect(() => {
     // Restore muted preference from localStorage and apply to audio module
@@ -198,6 +199,21 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
       window.removeEventListener('resize', applyOrient);
       window.removeEventListener('orientationchange', applyOrient);
     };
+  }, []);
+
+  // Auto-pause when the app is backgrounded — rAF freezes in hidden tabs but
+  // the Web Audio sequencer keeps playing, so the music would drift on without
+  // the game. Pause the run and silence the music; the player resumes manually.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden && !pausedRef.current) {
+        pausedRef.current = true;
+        setPaused(true);
+        stopMusic();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
   }, []);
 
   // Block native gestures (edge-back swipes, pull-to-refresh, pinch-zoom,
@@ -707,6 +723,8 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
             const next = !pausedRef.current;
             pausedRef.current = next;
             setPaused(next);
+            if (next) stopMusic();
+            else startMusic(lastThemeRef.current);
           }}
           style={{
             width: 40, height: 40,
@@ -776,7 +794,7 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
             <button
               type="button"
               className="font-pix"
-              onClick={() => { pausedRef.current = false; setPaused(false); }}
+              onClick={() => { pausedRef.current = false; setPaused(false); startMusic(lastThemeRef.current); }}
               style={{
                 background: '#00D4FF',
                 color: '#050a16',
