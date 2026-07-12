@@ -16,6 +16,16 @@ Crunchy 8-bit side-scrolling platformer on **Base**. Run, jump, stomp, fire — 
 - Built for one-handed phones: touch D-pad + HOP + RUN/FIRE, integer-scaled crisp pixels, safe-area aware
 - Keyboard support on desktop: arrows/WASD + Space + Shift/X/Z
 
+## Controls
+
+| Action | Touch | Keyboard |
+|---|---|---|
+| Move | ◀ ▶ D-pad | ← → / A D |
+| Jump (hold = higher) | HOP | Space / ↑ / W |
+| Crouch | ▼ | ↓ / S |
+| Sprint / Fireball | RUN/FIRE | Shift / X / Z |
+| Pause | ⏸ button | — |
+
 ## Onchain (Base mainnet, 8453)
 
 Optional — the game is fully playable without a wallet and gracefully degrades to localStorage.
