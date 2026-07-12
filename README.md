@@ -1,5 +1,9 @@
 # BLOCKS
 
+[![CI](https://github.com/blessedunit/blocks-base/actions/workflows/ci.yml/badge.svg)](https://github.com/blessedunit/blocks-base/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Base](https://img.shields.io/badge/chain-Base%208453-0052FF)](https://basescan.org/address/0xca00c5470caf234a0ad9bc495e71d680125386ed)
+
 Crunchy 8-bit side-scrolling platformer on **Base**. Run, jump, stomp, fire — 16 stages of pipes, lava and one very angry boss.
 
 **▶ Play:** https://blocks-base.vercel.app
