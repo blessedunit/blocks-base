@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "deploy": "node deploy.mjs"
+    "deploy": "node deploy.mjs",
+    "check": "node check.mjs"
   },
   "dependencies": {
     "solc": "0.8.28",
