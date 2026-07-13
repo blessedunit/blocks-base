@@ -500,6 +500,7 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
     e.stopPropagation();
     const el = joyBaseRef.current;
     if (!el) return;
+    buzz();
     const rect = el.getBoundingClientRect();
     joyActiveRef.current = {
       id: e.pointerId,
@@ -606,6 +607,10 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
     </div>
   );
 
+  // Tiny haptic tick on touch controls — 8ms is a "key click", not a rumble.
+  // navigator.vibrate is absent on iOS Safari; the optional call makes it a no-op.
+  const buzz = () => { try { navigator.vibrate?.(8); } catch { /* noop */ } };
+
   // Modern minimalist round button — glassy translucent fill, accent border on
   // the active state. Same diameter as the joystick base for visual harmony.
   const roundActionBtn = (size: number, accent: string): React.CSSProperties => ({
@@ -635,7 +640,7 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
       <button
         type="button"
         aria-label="Fire"
-        onPointerDown={(e) => { e.preventDefault(); onFireDown(); }}
+        onPointerDown={(e) => { e.preventDefault(); buzz(); onFireDown(); }}
         onPointerUp={(e) => { e.preventDefault(); onFireUp(); }}
         onPointerCancel={onFireUp}
         onPointerLeave={onFireUp}
@@ -646,7 +651,7 @@ export default function GameCanvas({ startLevel, startSize, startScore, startLiv
       <button
         type="button"
         aria-label="Jump"
-        onPointerDown={(e) => { e.preventDefault(); onJumpDown(); }}
+        onPointerDown={(e) => { e.preventDefault(); buzz(); onJumpDown(); }}
         onPointerUp={(e) => { e.preventDefault(); onJumpUp(); }}
         onPointerCancel={onJumpUp}
         onPointerLeave={onJumpUp}
