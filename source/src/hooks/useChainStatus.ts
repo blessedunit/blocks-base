@@ -25,6 +25,8 @@ const DAILY_EVENT = parseAbiItem(
 const LS_UNLOCK_PREFIX = 'blocks:unlock:';
 const LS_STREAK_PREFIX = 'blocks:streakDays:';
 const LS_CHECKIN_PREFIX = 'blocks:checkedIn:';
+const LS_CURSOR_PREFIX = 'blocks:logCursor:';
+const LS_DAYKEYS_PREFIX = 'blocks:dayKeys:';
 
 function lsGet(key: string): string | null {
   try { return localStorage.getItem(key); } catch { return null; }
@@ -40,13 +42,33 @@ interface DecodedLog {
   args: Record<string, unknown>;
 }
 
+// Scan cursor — remembers the last block already searched for a given
+// contract+wallet, so each refresh only reads blocks minted since the previous
+// one instead of re-walking the whole history from the deploy block.
+function cursorKey(tag: string, address: string): string {
+  return `${LS_CURSOR_PREFIX}${tag}:${address.toLowerCase()}`;
+}
+function readCursor(tag: string, address: string): bigint | null {
+  const raw = lsGet(cursorKey(tag, address));
+  if (!raw) return null;
+  try { return BigInt(raw); } catch { return null; }
+}
+function writeCursor(tag: string, address: string, block: bigint) {
+  // Keep a ~1min tail (Base mints ~1 block/2s) below the scanned tip: public
+  // RPCs index fresh logs with a lag, and a cursor placed exactly at `latest`
+  // could permanently skip an event that was mined but not yet indexed.
+  const SAFETY = 30n;
+  const safe = block > SAFETY ? block - SAFETY : 0n;
+  lsSet(cursorKey(tag, address), safe.toString());
+}
+
 async function fetchPlayerLogs(
   client: PublicClient,
   address: `0x${string}`,
   contractAddress: `0x${string}`,
   event: AbiEvent,
   fromBlock: bigint,
-): Promise<DecodedLog[]> {
+): Promise<{ logs: DecodedLog[]; scannedTo: bigint }> {
   const latest = await client.getBlockNumber();
   const ranges: Array<{ from: bigint; to: bigint }> = [];
   for (let b = fromBlock; b <= latest; b += CHUNK) {
@@ -74,7 +96,7 @@ async function fetchPlayerLogs(
       }
     }
   }
-  return out;
+  return { logs: out, scannedTo: latest };
 }
 
 // ── Unlock — true once the wallet has any RunRecorded with levelsCleared >= 16
@@ -92,15 +114,25 @@ export function useUnlock() {
       setUnlocked(false);
       return;
     }
+    // A full clear is permanent — once we've seen one, never scan again.
+    if (lsGet(LS_UNLOCK_PREFIX + address.toLowerCase()) === '1') {
+      setUnlocked(true);
+      return;
+    }
     setLoading(true);
     try {
-      const logs = await fetchPlayerLogs(client, address, CONTRACT_ADDRESS, RUN_EVENT, DEPLOY_BLOCK);
+      const cached = readCursor('run', address);
+      const from = cached != null && cached >= DEPLOY_BLOCK ? cached + 1n : DEPLOY_BLOCK;
+      const { logs, scannedTo } = await fetchPlayerLogs(client, address, CONTRACT_ADDRESS, RUN_EVENT, from);
       const ok = logs.some((l) => {
         const lvl = Number(l.args.levelsCleared ?? 0);
         return lvl >= LEVELS_TOTAL;
       });
-      setUnlocked(ok);
-      lsSet(LS_UNLOCK_PREFIX + address.toLowerCase(), ok ? '1' : '0');
+      writeCursor('run', address, scannedTo);
+      if (ok) {
+        setUnlocked(true);
+        lsSet(LS_UNLOCK_PREFIX + address.toLowerCase(), '1');
+      }
     } catch {
       // keep cached value on failure
     } finally {
@@ -151,14 +183,25 @@ export function useStreak() {
     }
     setLoading(true);
     try {
-      const logs = await fetchPlayerLogs(client, address, DAILY_ADDRESS, DAILY_EVENT, DAILY_DEPLOY_BLOCK);
+      // Day keys already seen for this wallet — only blocks past the cursor
+      // are scanned; found keys accumulate in localStorage.
+      const daysKey = LS_DAYKEYS_PREFIX + address.toLowerCase();
       const days = new Set<number>();
+      try {
+        const arr = JSON.parse(lsGet(daysKey) ?? '[]') as number[];
+        if (Array.isArray(arr)) for (const k of arr) if (Number.isFinite(k)) days.add(k);
+      } catch { /* start empty */ }
+      const cached = readCursor('daily', address);
+      const from = cached != null && cached >= DAILY_DEPLOY_BLOCK ? cached + 1n : DAILY_DEPLOY_BLOCK;
+      const { logs, scannedTo } = await fetchPlayerLogs(client, address, DAILY_ADDRESS, DAILY_EVENT, from);
       for (const l of logs) {
         const raw = l.args.dayKey;
         if (raw == null) continue;
         const k = typeof raw === 'bigint' ? Number(raw) : Number(raw);
         if (Number.isFinite(k)) days.add(k);
       }
+      lsSet(daysKey, JSON.stringify(Array.from(days)));
+      writeCursor('daily', address, scannedTo);
       const todayKey = todayDayKey();
       // A check-in tx lands on the RPC's event index with a lag. If we recorded
       // today optimistically (markCheckedIn) but the log isn't visible yet,
