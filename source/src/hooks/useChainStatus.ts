@@ -160,7 +160,14 @@ export function useStreak() {
         if (Number.isFinite(k)) days.add(k);
       }
       const todayKey = todayDayKey();
-      const hasToday = days.has(todayKey);
+      // A check-in tx lands on the RPC's event index with a lag. If we recorded
+      // today optimistically (markCheckedIn) but the log isn't visible yet,
+      // trust the local flag — otherwise the button re-enables and a second
+      // (wasted) check-in tx becomes possible.
+      const optimisticToday =
+        lsGet(LS_CHECKIN_PREFIX + address.toLowerCase()) === String(todayKey);
+      const hasToday = days.has(todayKey) || optimisticToday;
+      if (hasToday) days.add(todayKey);
       // Count back from today (or yesterday if today missing — streak still alive)
       const start = hasToday ? new Date() : (() => {
         const y = new Date();
