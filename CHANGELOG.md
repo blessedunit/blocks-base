@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Fix: daily check-in race — a not-yet-indexed tx could re-enable the button
+  and allow a second wasted check-in (#3)
+- Perf: incremental event-log scanning with a cached per-wallet cursor;
+  unlock stops scanning entirely once earned (#4)
+- Haptic tick on touch controls (#1)
+- CI: contracts compile-check job (#2)
 - Keyboard pause: Escape / P (music stops while paused)
 - Joystick exposed to assistive tech (`role="application"` + label)
 - Line-ending normalization via `.gitattributes`
