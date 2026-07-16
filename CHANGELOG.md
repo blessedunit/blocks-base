@@ -1,15 +1,18 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 — 2026-07-16
 
 - Fix: daily check-in race — a not-yet-indexed tx could re-enable the button
   and allow a second wasted check-in (#3)
 - Perf: incremental event-log scanning with a cached per-wallet cursor;
   unlock stops scanning entirely once earned (#4)
+- Perf: leaderboard resumes from a cached snapshot instead of a full rescan;
+  daily tab scans a bounded 39h block window
 - Haptic tick on touch controls (#1)
 - CI: contracts compile-check job (#2)
 - Keyboard pause: Escape / P (music stops while paused)
-- Joystick exposed to assistive tech (`role="application"` + label)
+- A11y: joystick labeled for assistive tech; podium and rescue scenes honor
+  `prefers-reduced-motion`
 - Line-ending normalization via `.gitattributes`
 
 ## 0.1.0 — 2026-07-12
