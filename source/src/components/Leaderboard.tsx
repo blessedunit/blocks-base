@@ -123,9 +123,17 @@ function writeLbCache(latest: bigint, entries: Entry[]) {
   } catch { /* noop */ }
 }
 
+// Today's day-key can only appear in recent blocks: Base mints ~1 block/2s and
+// "today" started at most ~26h ago in the poster's own timezone (UTC+14 edge),
+// so a ~39h window (70k blocks) safely bounds the scan instead of walking the
+// whole contract history for a single day's ranking.
+const DAILY_WINDOW_BLOCKS = 70_000n;
+
 async function fetchDailyLogs(client: PublicClient, latest: bigint, dayKey: number) {
+  const windowStart = latest > DAILY_WINDOW_BLOCKS ? latest - DAILY_WINDOW_BLOCKS : 0n;
+  const fromBlock = windowStart > DAILY_DEPLOY_BLOCK ? windowStart : DAILY_DEPLOY_BLOCK;
   const ranges: Array<{ from: bigint; to: bigint }> = [];
-  for (let b = DAILY_DEPLOY_BLOCK; b <= latest; b += CHUNK) {
+  for (let b = fromBlock; b <= latest; b += CHUNK) {
     const end = b + CHUNK - 1n > latest ? latest : b + CHUNK - 1n;
     ranges.push({ from: b, to: end });
   }
