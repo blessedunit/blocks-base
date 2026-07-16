@@ -65,9 +65,9 @@ function formatTime(ms: number): string {
   return `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}.${String(cs).padStart(2, '0')}`;
 }
 
-async function fetchAllLogs(client: PublicClient, latest: bigint) {
+async function fetchAllLogs(client: PublicClient, latest: bigint, fromBlock: bigint) {
   const ranges: Array<{ from: bigint; to: bigint }> = [];
-  for (let b = DEPLOY_BLOCK; b <= latest; b += CHUNK) {
+  for (let b = fromBlock; b <= latest; b += CHUNK) {
     const end = b + CHUNK - 1n > latest ? latest : b + CHUNK - 1n;
     ranges.push({ from: b, to: end });
   }
@@ -88,7 +88,39 @@ async function fetchAllLogs(client: PublicClient, latest: bigint) {
   }
   // Only treat as unreachable if EVERY chunk failed; partial success still shows.
   if (ok === 0 && fail > 0) throw new Error('chain unreachable');
-  return out;
+  // `complete` gates snapshot persistence — a partially-scanned range must not
+  // advance the cursor or events in the failed chunks would be lost for good.
+  return { logs: out, complete: fail === 0 };
+}
+
+// Cached leaderboard snapshot — aggregated bests + the block the scan stopped
+// at. Next open only walks blocks minted since then. Cursor parks ~30 blocks
+// below the tip because public RPCs index fresh logs with a lag.
+const LS_LB_CACHE = 'blocks:lbCache:v1';
+const CURSOR_SAFETY = 30n;
+
+interface LbCache { cursor: string; entries: Entry[] }
+
+function readLbCache(): { fromBlock: bigint; entries: Map<string, Entry> } | null {
+  try {
+    const raw = localStorage.getItem(LS_LB_CACHE);
+    if (!raw) return null;
+    const c = JSON.parse(raw) as LbCache;
+    const cursor = BigInt(c.cursor);
+    if (cursor < DEPLOY_BLOCK || !Array.isArray(c.entries)) return null;
+    const entries = new Map<string, Entry>();
+    for (const e of c.entries) {
+      if (typeof e?.player === 'string') entries.set(e.player.toLowerCase(), { ...e });
+    }
+    return { fromBlock: cursor + 1n, entries };
+  } catch { return null; }
+}
+
+function writeLbCache(latest: bigint, entries: Entry[]) {
+  try {
+    const cursor = latest > CURSOR_SAFETY ? latest - CURSOR_SAFETY : 0n;
+    localStorage.setItem(LS_LB_CACHE, JSON.stringify({ cursor: cursor.toString(), entries }));
+  } catch { /* noop */ }
 }
 
 async function fetchDailyLogs(client: PublicClient, latest: bigint, dayKey: number) {
@@ -274,8 +306,10 @@ export default function Leaderboard({ onBack }: Props) {
       setErr(null);
       try {
         const latest = await client.getBlockNumber();
-        const logs = await fetchAllLogs(client as PublicClient, latest);
-        const best = new Map<string, Entry>();
+        const cached = readLbCache();
+        const from = cached ? cached.fromBlock : DEPLOY_BLOCK;
+        const { logs, complete } = await fetchAllLogs(client as PublicClient, latest, from);
+        const best = cached ? cached.entries : new Map<string, Entry>();
         for (const l of logs) {
           const a = (l as { args?: { player?: string; score?: bigint; timeMs?: bigint; levelsCleared?: number } }).args;
           if (!a || typeof a.player !== 'string' || typeof a.score !== 'bigint' || typeof a.timeMs !== 'bigint') continue;
@@ -291,6 +325,7 @@ export default function Leaderboard({ onBack }: Props) {
           best.set(key, newEntry);
         }
         const list = Array.from(best.values());
+        if (complete) writeLbCache(latest, list);
         if (!cancelled) setEntries(list);
       } catch (e) {
         if (!cancelled) setErr(e instanceof Error ? e.message : 'rpc failed');
