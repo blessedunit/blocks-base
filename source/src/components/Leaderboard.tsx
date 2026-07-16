@@ -179,6 +179,8 @@ function Podium() {
     ctx.imageSmoothingEnabled = false;
     let raf = 0;
     const start = performance.now();
+    // Draw a single static frame for users who asked the OS to reduce motion.
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
     // Confetti pre-seeded paths
     const confetti = Array.from({ length: 18 }, () => ({
@@ -275,7 +277,7 @@ function Podium() {
       };
       spotlight(39, '#FFD23F');
 
-      raf = requestAnimationFrame(loop);
+      if (!reducedMotion) raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);

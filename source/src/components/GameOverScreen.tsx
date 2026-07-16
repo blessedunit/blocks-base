@@ -57,6 +57,8 @@ export default function GameOverScreen({ score, reachedLevel, runTimeMs, complet
     ctx.imageSmoothingEnabled = false;
     let raf = 0;
     const start = performance.now();
+    // Draw a single static frame for users who asked the OS to reduce motion.
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
     const loop = (t: number) => {
       const dt = t - start;
       ctx.clearRect(0, 0, c.width, c.height);
@@ -76,7 +78,7 @@ export default function GameOverScreen({ score, reachedLevel, runTimeMs, complet
       const bob = Math.sin(dt * 0.003) * 3;
       drawSprite(ctx, PLAYER_S_IDLE, 3 * SCALE, (8 + bob) * SCALE, SCALE);
       drawSprite(ctx, QUEEN, 22 * SCALE, (0 + bob) * SCALE, SCALE);
-      raf = requestAnimationFrame(loop);
+      if (!reducedMotion) raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
