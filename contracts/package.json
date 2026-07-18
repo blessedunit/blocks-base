@@ -4,10 +4,15 @@
   "type": "module",
   "scripts": {
     "deploy": "node deploy.mjs",
-    "check": "node check.mjs"
+    "check": "node check.mjs",
+    "test": "node test.mjs"
   },
   "dependencies": {
     "solc": "0.8.28",
     "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@ethereumjs/util": "^9.1.0",
+    "@ethereumjs/vm": "^8.1.1"
   }
 }
