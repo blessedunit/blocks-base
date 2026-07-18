@@ -24,6 +24,22 @@ Daily challenge ranking.
 - `recordDailyRun(uint32 dayKey, uint256 score, uint256 timeMs, bool cleared)` — per-day, per-player bests + `DailyRunRecorded` event.
 - `dayKey` is `YYYYMMDD` computed client-side; days are independent leaderboards.
 
+## Test
+
+```bash
+npm install
+npm test
+```
+
+`test.mjs` compiles each contract with solc and deploys the bytecode into an
+in-memory EVM (`@ethereumjs/vm`), then drives real calls to assert the
+invariants the client depends on — monotonic best score, full-clear-only best
+time, per-day isolation, the skin price/id/ownership rules. No network or anvil
+needed, so it runs the same locally and in CI.
+
+`npm run check` is the faster compile-only gate (no execution) used as a
+first pass.
+
 ## Deploy
 
 ```bash
