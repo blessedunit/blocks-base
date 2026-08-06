@@ -8,3 +8,4 @@ dist/
 
 # contracts: pinned via deps in package.json, lockfile not tracked
 contracts/package-lock.json
+source/package-lock.json
