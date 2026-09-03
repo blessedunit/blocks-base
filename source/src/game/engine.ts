@@ -18,6 +18,9 @@ import {
   BOWSER_W,
   BRICK_BREAK_VALUE,
   COIN_VALUE,
+  COIN_STREAK_STEP,
+  COIN_STREAK_MAX_MULT,
+  COIN_STREAK_TIMEOUT,
   COYOTE_FRAMES,
   EXTRA_LIFE_AT_COINS,
   FIREBALL_BOUNCE,
@@ -303,6 +306,11 @@ export interface GameState {
   // Combo chain — number of enemies killed in one airborne sequence (resets
   // when player lands). Multiplies the base +100 reward: 2nd = +200, 3rd = +400...
   comboChain: number;
+  // Coin streak — coins grabbed in quick succession. `coinStreak` counts them;
+  // `coinStreakT` is frames left before the streak lapses (topped up on each coin).
+  // Drives a score multiplier (see coinMultiplier); resets to 0 on damage.
+  coinStreak: number;
+  coinStreakT: number;
   // Flips to true the first time the player takes damage in the current level.
   // Used to award a no-damage bonus on level clear.
   damagedThisLevel: boolean;
@@ -473,6 +481,8 @@ function loadLevel(opts: LoadOpts): GameState {
     pickedStar: 0,
     pickupToast: null,
     comboChain: 0,
+    coinStreak: 0,
+    coinStreakT: 0,
     damagedThisLevel: false,
 
     camX: 0, camY: 0,
@@ -630,20 +640,33 @@ function pushParticles(s: GameState, x: number, y: number, color: string, n = 6,
   }
 }
 
-function awardCoin(s: GameState, opts: { silent?: boolean } = {}) {
+// Score multiplier from the current coin streak: ×1 at the start, +1 every
+// COIN_STREAK_STEP coins, capped at COIN_STREAK_MAX_MULT.
+export function coinMultiplier(s: GameState): number {
+  return Math.min(COIN_STREAK_MAX_MULT, 1 + Math.floor(s.coinStreak / COIN_STREAK_STEP));
+}
+
+export function awardCoin(s: GameState, opts: { silent?: boolean } = {}) {
   s.coins += 1;
-  s.score += COIN_VALUE;
+  // Grow the streak and refresh its lapse timer, then pay out at the multiplier.
+  s.coinStreak += 1;
+  s.coinStreakT = COIN_STREAK_TIMEOUT;
+  const mult = coinMultiplier(s);
+  s.score += COIN_VALUE * mult;
   s.sfxEvents.push('coin');
-  s.pickupToast = { text: 'COIN × ' + s.coins, framesLeft: 120 };
+  s.pickupToast = {
+    text: mult > 1 ? 'COIN × ' + s.coins + '  ×' + mult : 'COIN × ' + s.coins,
+    framesLeft: 120,
+  };
   if (!opts.silent) {
-    // Floating "+100" near the player (same feel as enemy-kill popups).
+    // Floating "+100" (or "+100 ×N" while a multiplier is active) near the player.
     s.coinPops.push({
       id: s.nextId++,
       x: s.px + 6, y: s.py - 2,
       vy: -2.6,
       life: 50,
-      text: '+' + COIN_VALUE,
-      color: '#FFD23F',
+      text: mult > 1 ? '+' + COIN_VALUE + ' ×' + mult : '+' + COIN_VALUE,
+      color: mult > 1 ? '#FFB000' : '#FFD23F',
     });
   }
   if (s.coins > 0 && s.coins % EXTRA_LIFE_AT_COINS === 0) {
@@ -657,6 +680,9 @@ function takeDamage(s: GameState): boolean {
   if (s.pStarT > 0) return false;        // Star = full invincibility
   if (s.pStompGrace > 0) return false;   // protects against same-frame damage from adjacent enemies
   s.damagedThisLevel = true;
+  // Taking a hit breaks the coin streak — the multiplier is a clean-run reward.
+  s.coinStreak = 0;
+  s.coinStreakT = 0;
   if (s.pSize === 'fire' || s.pSize === 'super') {
     s.pSize = 'small';
     s.py = s.py + (PLAYER_SUPER_H - PLAYER_SMALL_H);
@@ -1059,6 +1085,11 @@ export function step(s: GameState, dtMs: number, viewW: number = VIEW_W) {
   if (s.pTransformT > 0) s.pTransformT -= 1;
   if (s.pFireCooldown > 0) s.pFireCooldown -= 1;
   if (s.pStompGrace > 0) s.pStompGrace -= 1;
+  // Coin streak lapses if no coin is grabbed for COIN_STREAK_TIMEOUT frames.
+  if (s.coinStreakT > 0) {
+    s.coinStreakT -= 1;
+    if (s.coinStreakT === 0) s.coinStreak = 0;
+  }
 
   // Fall off the world
   if (s.py > s.level.height * TILE + 60) {
