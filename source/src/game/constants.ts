@@ -120,6 +120,15 @@ export const NO_DAMAGE_BONUS = 1000;
 export const GAME_COMPLETE_VALUE = 5000;
 export const EXTRA_LIFE_AT_COINS = 100;  // every 100 coins = +1 life
 
+// Coin streak — collect coins in quick succession to build a score multiplier.
+// Every COIN_STREAK_STEP coins grabbed without a break bumps the multiplier by 1,
+// capped at COIN_STREAK_MAX_MULT. The streak decays if you go COIN_STREAK_TIMEOUT
+// frames without picking up a coin, and it resets to 0 when you take damage — so
+// the multiplier rewards aggressive, clean coin runs rather than idle hoarding.
+export const COIN_STREAK_STEP = 5;         // coins per +1 multiplier tier
+export const COIN_STREAK_MAX_MULT = 5;     // multiplier cap (×5)
+export const COIN_STREAK_TIMEOUT = 180;    // frames (~3s at 60Hz) before a streak lapses
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Lives + camera + view
 // ─────────────────────────────────────────────────────────────────────────────
