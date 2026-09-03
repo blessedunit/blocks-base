@@ -15,6 +15,7 @@ Crunchy 8-bit side-scrolling platformer on **Base**. Run, jump, stomp, fire — 
 - 4 worlds × 4 stages — overworld, underground, sky bridges, castle with a boss fight
 - Classic power-up chain: mushroom → super (breaks bricks) → fire flower (bouncing fireballs)
 - Stomps, shell kicks, invincibility stars, secret coin blocks, speedrun timer
+- Coin-streak multiplier: grab coins in quick succession to build a ×2–×5 score bonus — a clean run pays off, but one hit breaks the chain
 - Procedural chiptune soundtrack — 4 themes rendered live with Web Audio, no audio files
 - Original pixel art: every sprite is drawn in code (no external assets)
 - Built for one-handed phones: touch D-pad + HOP + RUN/FIRE, integer-scaled crisp pixels, safe-area aware
